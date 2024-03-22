@@ -1,0 +1,15 @@
+{
+    "activCredentials": {
+        "activ_username": "username",
+        "activ_password": "password"
+    },
+    "symbols": [
+	    "MSFT.N",
+	    "AAPL.N",
+	    "NVDA.N",
+	    "TSLA.N",
+	    "GOOGL.N",
+	    "AMZN.N",
+	    "META.N"
+    ] 
+}
