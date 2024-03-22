@@ -125,6 +125,39 @@ class SessionHandler:
             pass
 
 
+class SnapshotHandler:
+        def __init__(self):
+                self.complete = False
+
+        def on_snapshot(self, msg, context):
+                self.complete = True
+
+                print()
+                print('on_snapshot:')
+                print()
+                print_field('DataSource', msg.data_source_id)
+                print_field('Symbology', msg.symbology_id)
+                print_field('Symbol', msg.symbol)
+                print_field('PermissionId', msg.permission_id)
+                print_field('UpdateId', msg.update_id)
+                print()
+                for (fid, field) in msg.fields.items():
+                        field_name = context.session.metadata.get_field_name(msg.data_source_id, fid)
+                        print_field(field_name, field)
+
+        def on_snapshot_failure(self, msg, context):
+                self.complete = True
+
+                print()
+                print('on_snapshot_failure:')
+                print()
+                print_field('DataSource', msg.data_source_id)
+                print_field('Symbology', msg.symbology_id)
+                print_field('Symbol', msg.symbol)
+                print_field('StatusCode', status_code_to_string(msg.status_code))
+
+
+
 class SnapshotHandlerTradeInfo:
     """
     A custom SnapshotHandler class for handling trade information.
@@ -225,7 +258,8 @@ if __name__ == "__main__":
 
     for symbol in symbolList:
         print('Requesting snapshot for %s...' % symbol)
-        handler = SnapshotHandlerTradeInfo()
+        #handler = SnapshotHandlerTradeInfo()
+        handler = SnapshotHandler()
         handlerBySymbol[symbol] = handler
         handle = session.snapshot(DATA_SOURCE_ACTIV, symbol, handler)
         handleBySymbol[symbol] = handle
@@ -243,12 +277,12 @@ if __name__ == "__main__":
                     break
 
     finally:
-        for handler in handlerBySymbol.values():
-            underlying_curent_prices.append(
-                [handler.data['Symbol'], handler.data['LastReportedTrade']])
+        # for handler in handlerBySymbol.values():
+        #     underlying_curent_prices.append(
+        #         [handler.data['Symbol'], handler.data['LastReportedTrade']])
 
         for handle in handleBySymbol.values():
             handle.close()
 
-    for underlying in underlying_curent_prices:
-        print(underlying)
+    # for underlying in underlying_curent_prices:
+    #     print(underlying)

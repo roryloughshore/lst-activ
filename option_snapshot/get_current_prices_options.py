@@ -221,7 +221,11 @@ class SnapshotHandlerOptionInfo:
             "BidSize": "",
             "Ask": "",
             "AskSize": "",
+            "OpenInterest": "",
             "Trade": "",
+            "TradeSize": "",
+            "CumulativeValue": "",
+            "CumulativeVolume": "",
             "ExpirationDate": "",
             "OptionType": "",
             "StrikePrice": "",
@@ -337,9 +341,10 @@ if __name__ == '__main__':
     # Set the data file path for the option data
     data_dir = Path(os.path.dirname(os.path.abspath(
         getsourcefile(lambda: 0))))
-    data_file = data_dir.joinpath('option_data.csv')
+    options_full_file = data_dir.joinpath('option_data.csv')
+    options_filtered_file = data_dir.joinpath('option_data_filtered.csv')
 
-    option_data_pd = pd.read_csv(data_file)
+    option_data_pd = pd.read_csv(options_full_file)
     option_data_pd['Check'] = 1
 
     # Set the list of symbols to update from the configuration file
@@ -470,24 +475,63 @@ if __name__ == '__main__':
         option_data_output_pd['ExpirationDate'])
 
     # Save the updated option data to the options_data.csv file
-    option_data_output_pd.to_csv(data_file, index=False)
+    option_data_output_pd.to_csv(options_full_file, index=False)
 
     # For each equity symbol get a list of options which have a
-    # strike price within 1% of the current price
+    # strike price within 2% of the current price
     # and an expiration date between 2 and 4 months from now
+    option_data_filtered = []
     for symbol in underlying_curent_prices:
         print('Getting options for %s...' % symbol[0])
         current_price = float(symbol[1])
 
-        option_data_filtered = option_data_output_pd[
+        option_symbol_filtered = option_data_output_pd[
             option_data_output_pd['Underlying'] == symbol[0]]
 
-        option_data_filtered = option_data_filtered[
-            (option_data_filtered['StrikePrice'] >= current_price * 0.98) &
-            (option_data_filtered['StrikePrice'] <= current_price * 1.02) &
-            (option_data_filtered['ExpirationDate'] >=
+        option_symbol_filtered = option_symbol_filtered[
+            (option_symbol_filtered['StrikePrice'] >= current_price * 0.98) &
+            (option_symbol_filtered['StrikePrice'] <= current_price * 1.02) &
+            (option_symbol_filtered['ExpirationDate'] >=
                 datetime.now() + pd.DateOffset(months=2)) &
-            (option_data_filtered['ExpirationDate'] <=
+            (option_symbol_filtered['ExpirationDate'] <=
                 datetime.now() + pd.DateOffset(months=4))]
 
-        print(option_data_filtered)
+        if len(option_symbol_filtered) > 0:
+            print("Getting filtered option details for %s" % symbol)
+
+            for option_symbol in tqdm(option_symbol_filtered.itertuples(),
+                                      total=len(option_symbol_filtered)):
+
+                handler = SnapshotHandlerOptionInfo()
+                handle = session.snapshot(
+                    DATA_SOURCE_ACTIV, option_symbol.OptionSymbol, handler)
+
+                try:
+                    while not handler.complete:
+                        session.process()
+                finally:
+                    option_data_current = [symbol[0],]
+                    option_data_current.extend(handler.data.values())
+                    option_data_filtered.append(option_data_current)
+                    handle.close()
+
+    # Save the filtered option data to the options_data_filtered.csv file
+    option_data_filtered_pd = pd.DataFrame(
+        option_data_filtered,
+        columns=[
+            'Underlying',
+            'Bid',
+            'BidSize',
+            'Ask',
+            'AskSize',
+            'OpenInterest',
+            'Trade',
+            'TradeSize',
+            'CumulativeValue',
+            'CumulativeVolume',
+            'ExpirationDate',
+            'OptionType',
+            'StrikePrice',
+            'OptionSymbol'
+        ])
+    option_data_filtered_pd.to_csv(options_filtered_file, index=False)
