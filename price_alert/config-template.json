@@ -1,0 +1,34 @@
+{
+    "activCredentials": {
+        "activ_username": "username",
+        "activ_password": "password"
+    },
+    "alerts": [
+        {
+            "alertID": 1,
+            "symbol": "BABA.N",
+            "name": "Break of local resistance",
+            "type": "Price Alert",
+            "condition": "cross above",
+            "value": 89,
+            "notification": {
+                "endpoint": "https://lst.roryredmond.co.uk/email_alert/send.php",
+                "authorization": "Bearer token",
+                "from": {
+                    "address": "rory@loughshore.co",
+                    "name": "Rory Redmond"
+                },
+                "sendTo": [
+                    {
+                        "addAddress": "rory@loughshore.co",
+                        "addName": "Rory Redmond"
+                    },
+                    {
+                        "addAddress": "ryan@loughshore.co",
+                        "addName": "Ryan Lavery"
+                    }
+                ]
+            }
+        }
+    ]
+}
