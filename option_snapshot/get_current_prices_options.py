@@ -494,14 +494,10 @@ if __name__ == '__main__':
         option_symbol_filtered = option_symbol_filtered[
             (option_symbol_filtered['StrikePrice'] >= current_price * 0.95) &
             (option_symbol_filtered['StrikePrice'] <= current_price * 1.05) &
-            (option_symbol_filtered['ExpirationDate'] >=
-                pd.Timestamp('2024-09-27')) &
+            (option_symbol_filtered['ExpirationDate'] >
+                datetime.now())) &
             (option_symbol_filtered['ExpirationDate'] <=
-                pd.Timestamp('2024-12-29'))]
-            # (option_symbol_filtered['ExpirationDate'] >=
-            #     datetime.now() + pd.DateOffset(months=2)) &
-            # (option_symbol_filtered['ExpirationDate'] <=
-            #     datetime.now() + pd.DateOffset(months=4))]
+                datetime.now() + pd.DateOffset(months=12))]
 
         if len(option_symbol_filtered) > 0:
             print("Getting filtered option details for %s" % symbol)
