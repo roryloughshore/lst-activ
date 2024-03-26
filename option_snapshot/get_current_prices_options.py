@@ -495,7 +495,7 @@ if __name__ == '__main__':
             (option_symbol_filtered['StrikePrice'] >= current_price * 0.95) &
             (option_symbol_filtered['StrikePrice'] <= current_price * 1.05) &
             (option_symbol_filtered['ExpirationDate'] >
-                datetime.now())) &
+                datetime.now()) &
             (option_symbol_filtered['ExpirationDate'] <=
                 datetime.now() + pd.DateOffset(months=12))]
 
