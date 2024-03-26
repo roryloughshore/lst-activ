@@ -217,6 +217,9 @@ class SnapshotHandlerOptionInfo:
     def __init__(self):
         self.complete = False
         self.data = {
+            "ClosingBid": "",
+            "ClosingAsk": "",
+            "Close": "",
             "Bid": "",
             "BidSize": "",
             "Ask": "",
@@ -489,12 +492,16 @@ if __name__ == '__main__':
             option_data_output_pd['Underlying'] == symbol[0]]
 
         option_symbol_filtered = option_symbol_filtered[
-            (option_symbol_filtered['StrikePrice'] >= current_price * 0.98) &
-            (option_symbol_filtered['StrikePrice'] <= current_price * 1.02) &
+            (option_symbol_filtered['StrikePrice'] >= current_price * 0.95) &
+            (option_symbol_filtered['StrikePrice'] <= current_price * 1.05) &
             (option_symbol_filtered['ExpirationDate'] >=
-                datetime.now() + pd.DateOffset(months=2)) &
+                pd.Timestamp('2024-09-27')) &
             (option_symbol_filtered['ExpirationDate'] <=
-                datetime.now() + pd.DateOffset(months=4))]
+                pd.Timestamp('2024-12-29'))]
+            # (option_symbol_filtered['ExpirationDate'] >=
+            #     datetime.now() + pd.DateOffset(months=2)) &
+            # (option_symbol_filtered['ExpirationDate'] <=
+            #     datetime.now() + pd.DateOffset(months=4))]
 
         if len(option_symbol_filtered) > 0:
             print("Getting filtered option details for %s" % symbol)
@@ -520,6 +527,9 @@ if __name__ == '__main__':
         option_data_filtered,
         columns=[
             'Underlying',
+            'ClosingBid',
+            'ClosingAsk',
+            'Close',
             'Bid',
             'BidSize',
             'Ask',
